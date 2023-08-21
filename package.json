@@ -15,12 +15,17 @@
         "node": "^18"
     },
     "scripts": {
-        "start": "vitest",
+        "dev": "vitest",
+        "test": "vitest run",
+        "build": "tsup src/index.ts --format cjs,esm --dts",
+        "lint": "tsc",
         "prettier": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc.json"
     },
     "devDependencies": {
         "@types/node": "^20.5.1",
         "prettier": "^3.0.2",
+        "tsup": "^7.2.0",
+        "typescript": "^5.1.6",
         "vitest": "^0.34.2"
     }
 }
