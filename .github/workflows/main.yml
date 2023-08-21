@@ -1,26 +1,26 @@
 name: CI
 on:
-    push:
-        branches:
-            - '**'
+  push:
+    branches:
+      - '**'
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                node-version: [18.x, 20.x]
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
 
-        steps:
-            - uses: actions/checkout@v3
-            - uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-            - uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'pnpm'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
-            - run: pnpm install --frozen-lockfile
-            - run: pnpm run lint && pnpm run build && pnpm run test
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint && pnpm run build && pnpm run test
