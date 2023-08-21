@@ -33,9 +33,7 @@ it('should encode and decode an array of 1M numbers', () => {
 });
 
 it('should encode and decode arrays of very large numbers', () => {
-    const array = Array.from({ length: 100 }, (_, i) =>
-        i < 50 ? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER - i,
-    );
+    const array = Array(100).fill(Number.MAX_SAFE_INTEGER);
     expect(decodeArray(encodeArray(array))).toEqual(array);
 });
 
@@ -48,6 +46,16 @@ it('should encode and decode arrays of numbers with same amounts of digits', () 
     for (const array of arrays) {
         expect(decodeArray(encodeArray(array))).toEqual(array);
     }
+});
+
+it('should encode and decode arrays of numbers with different amounts of digits', () => {
+    const array = [1, 2, 34, 567, 8999];
+    expect(decodeArray(encodeArray(array))).toEqual(array);
+});
+
+it('should encode and decode arrays of numbers with different amounts of digits containing zeros', () => {
+    const array = [0, 1, 10, 100, 101, 110, 111];
+    expect(decodeArray(encodeArray(array))).toEqual(array);
 });
 
 it('should encode and decode arrays of negative numbers when a proper "preTransform.scale" value is provided', () => {

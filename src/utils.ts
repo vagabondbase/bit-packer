@@ -24,3 +24,43 @@ export const chunk = ({
     }
     return chunkedArray;
 };
+
+export const chunkToBigInt = (
+    numbers: number[],
+    { numberOfDigits: inputNumberOfDigits }: { numberOfDigits: number },
+): bigint => {
+    const string = numbers
+        .map(n => {
+            const bigInt = BigInt(n);
+            const reversedString = [...bigInt.toString()].reverse().join('');
+            return reversedString.padEnd(inputNumberOfDigits, '0');
+        })
+        .join('');
+
+    let value = 0n;
+    for (let i = 0; i < string.length; i++) {
+        value += BigInt(string[i]) * 10n ** BigInt(string.length - i - 1);
+    }
+
+    return value;
+};
+
+export const bigIntToChunk = (
+    bigInt: bigint,
+    { numberOfDigits }: { numberOfDigits: number },
+): number[] => {
+    let string = bigInt.toString();
+    const mod = string.length % numberOfDigits;
+    if (mod !== 0) {
+        string = Array(mod).fill('0').join('') + string;
+    }
+
+    const numbers = [] as number[];
+    for (let i = 0; i < string.length; i += numberOfDigits) {
+        const subString = [...string.slice(i, i + numberOfDigits)]
+            .reverse()
+            .join('');
+        numbers.push(Number(subString));
+    }
+    return numbers;
+};

@@ -62,3 +62,43 @@ describe('utils:numberOfDigits', () => {
         expect(utils.numberOfDigits(-100)).toBe(3);
     });
 });
+
+describe('utils:chunkToBigInt, utils:bigIntToChunk', () => {
+    it('should return the correct bigint', () => {
+        expect(utils.chunkToBigInt([1, 2, 3], { numberOfDigits: 1 })).toBe(
+            123n,
+        );
+
+        expect(
+            utils.chunkToBigInt([10, 11, 20, 22], { numberOfDigits: 2 }),
+        ).toBe(1_11_02_22n);
+
+        expect(
+            utils.bigIntToChunk(
+                utils.chunkToBigInt([1, 2, 3], { numberOfDigits: 1 }),
+                { numberOfDigits: 1 },
+            ),
+        ).toEqual([1, 2, 3]);
+
+        expect(
+            utils.bigIntToChunk(
+                utils.chunkToBigInt([10, 20, 30], { numberOfDigits: 2 }),
+                { numberOfDigits: 2 },
+            ),
+        ).toEqual([10, 20, 30]);
+
+        expect(
+            utils.bigIntToChunk(
+                utils.chunkToBigInt([1, 22, 3], { numberOfDigits: 2 }),
+                { numberOfDigits: 2 },
+            ),
+        ).toEqual([1, 22, 3]);
+
+        expect(
+            utils.bigIntToChunk(
+                utils.chunkToBigInt([1, 22, 303], { numberOfDigits: 3 }),
+                { numberOfDigits: 3 },
+            ),
+        ).toEqual([1, 22, 303]);
+    });
+});

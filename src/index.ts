@@ -1,4 +1,4 @@
-import { chunk, numberOfDigits } from './utils';
+import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
 const bufferEncoding: BufferEncoding = 'utf16le';
 const headerOffset = 1 + 1 + 4 + 4;
@@ -65,15 +65,11 @@ export const encodeArray = (
     buffer.writeFloatLE(translate, 6); // 4 bytes for `preTransform.translate`
 
     for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
-        // E.g. chunk [1, 2, 3, 4] => 1234
         const chunk = chunks[chunkIndex];
-        let value = 0n;
-        for (let i = 0; i < chunk.length; i++) {
-            value +=
-                BigInt(chunk[chunk.length - 1 - i]) *
-                (10n ** BigInt(maxNumberOfDigits)) ** BigInt(i);
-        }
-        buffer.writeBigUInt64LE(value, headerOffset + chunkIndex * 8);
+        buffer.writeBigUInt64LE(
+            chunkToBigInt(chunk, { numberOfDigits: maxNumberOfDigits }),
+            headerOffset + chunkIndex * 8,
+        );
     }
 
     return buffer.toString(bufferEncoding);
@@ -93,21 +89,22 @@ export const decodeArray = (encodedArray: string) => {
         chunkIndex < (buffer.length - headerOffset) / 8;
         chunkIndex++
     ) {
-        const value = buffer
-            .readBigUInt64LE(headerOffset + chunkIndex * 8)
-            .toString();
+        const bigIntValue = buffer.readBigUInt64LE(
+            headerOffset + chunkIndex * 8,
+        );
 
-        for (
-            let i = 0;
-            i <
-            Math.floor(value.length / maxNumberOfDigits) * maxNumberOfDigits;
-            i += maxNumberOfDigits
-        ) {
-            let number = parseInt(value.slice(i, i + maxNumberOfDigits), 10);
+        const chunk = bigIntToChunk(bigIntValue, {
+            numberOfDigits: maxNumberOfDigits,
+        });
+
+        for (let i = 0; i < chunk.length; i++) {
+            let value = chunk[i];
+
             if (arrayIncludesZero) {
-                number -= 1;
+                value -= 1;
             }
-            array.push(number / scale - translate);
+
+            array.push(value / scale - translate);
         }
     }
 
