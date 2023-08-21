@@ -1,0 +1,26 @@
+{
+    "name": "bit-packer",
+    "version": "0.0.1",
+    "description": "",
+    "keywords": [
+        "bit packer"
+    ],
+    "author": {
+        "name": "Simone Cervini",
+        "email": "simone@vagabondbase.com",
+        "url": "https://vagabondbase.com/"
+    },
+    "license": "MIT",
+    "engines": {
+        "node": "^18"
+    },
+    "scripts": {
+        "start": "vitest",
+        "prettier": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc.json"
+    },
+    "devDependencies": {
+        "@types/node": "^20.5.1",
+        "prettier": "^3.0.2",
+        "vitest": "^0.34.2"
+    }
+}
