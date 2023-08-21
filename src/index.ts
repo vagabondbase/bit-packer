@@ -1,3 +1,5 @@
+import { chunk, numberOfDigits } from './utils';
+
 const bufferEncoding: BufferEncoding = 'utf16le';
 const headerOffset = 1 + 1 + 4 + 4;
 
@@ -110,24 +112,4 @@ export const decodeArray = (encodedArray: string) => {
     }
 
     return array;
-};
-
-const numberOfDigits = (number: number) => Math.floor(Math.log10(number)) + 1;
-
-const chunk = ({
-    array,
-    chunkLength,
-}: {
-    array: number[];
-    chunkLength: number;
-}) => {
-    let chunkedArray = [] as Array<typeof array>;
-    for (let i = 0; i < array.length; i++) {
-        const chunkIndex = Math.floor(i / chunkLength);
-        if (!chunkedArray[chunkIndex]) {
-            chunkedArray[chunkIndex] = [];
-        }
-        chunkedArray[chunkIndex].push(array[i]);
-    }
-    return chunkedArray;
 };
