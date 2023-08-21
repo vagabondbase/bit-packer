@@ -1,22 +1,27 @@
 const bufferEncoding: BufferEncoding = 'utf16le';
-const headerOffset = 1 + 1 + 4;
+const headerOffset = 1 + 1 + 4 + 4;
+
+export type EncodeArrayOptions = {
+    preTransform?: {
+        scale?: number;
+        translate?: number;
+    };
+};
 
 export const encodeArray = (
     inputArray: number[],
-    { multiplier }: { multiplier?: number } = {},
+    options?: EncodeArrayOptions,
 ) => {
+    const scale = options?.preTransform?.scale || 1;
+    const translate = options?.preTransform?.translate || 0;
+
     let array = [] as typeof inputArray;
     const arrayIncludesZero = inputArray.includes(0);
     for (let i = 0; i < inputArray.length; i++) {
         let number = inputArray[i];
 
-        if (multiplier) {
-            if (!Number.isFinite(multiplier) || multiplier <= 0) {
-                throw new Error(
-                    'The multiplier must be a finite positive number',
-                );
-            }
-            number = Math.round(number * multiplier);
+        if (options?.preTransform) {
+            number = Math.round(number * scale + translate);
         }
 
         if (!Number.isFinite(number)) {
@@ -54,7 +59,8 @@ export const encodeArray = (
     const buffer = Buffer.alloc(headerOffset + chunks.length * 8);
     buffer.writeUint8(maxNumberOfDigits); // 1 byte for maxNumberOfDigits
     buffer.writeUint8(arrayIncludesZero ? 1 : 0, 1); // 1 byte for arrayIncludesZero
-    buffer.writeFloatLE(multiplier || 1, 2); // 4 bytes for multiplier
+    buffer.writeFloatLE(scale, 2); // 4 bytes for `preTransform.scale`
+    buffer.writeFloatLE(translate, 6); // 4 bytes for `preTransform.translate`
 
     for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
         // E.g. chunk [1, 2, 3, 4] => 1234
@@ -77,7 +83,8 @@ export const decodeArray = (encodedArray: string) => {
 
     const maxNumberOfDigits = buffer.readUInt8(0);
     const arrayIncludesZero = buffer.readUInt8(1) === 1;
-    const multiplier = buffer.readFloatLE(2);
+    const scale = buffer.readFloatLE(2);
+    const translate = buffer.readFloatLE(6);
 
     for (
         let chunkIndex = 0;
@@ -98,7 +105,7 @@ export const decodeArray = (encodedArray: string) => {
             if (arrayIncludesZero) {
                 number -= 1;
             }
-            array.push(number / multiplier);
+            array.push(number / scale - translate);
         }
     }
 

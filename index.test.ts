@@ -50,9 +50,21 @@ it('should encode and decode arrays of numbers with same amounts of digits', () 
     }
 });
 
-it('should encode and decode arrays of floats when multiplier is provided', () => {
-    const array = [10.123456789, 20.123456789, 30.56789];
-    expect(decodeArray(encodeArray(array, { multiplier: 100 }))).toEqual([
-        10.12, 20.12, 30.57,
-    ]);
+it('should encode and decode arrays of negative numbers when a proper "preTransform.scale" value is provided', () => {
+    const array = [-10.123456789, -20.123456789, -30.56789];
+    expect(
+        decodeArray(encodeArray(array, { preTransform: { scale: -100 } })),
+    ).toEqual([-10.12, -20.12, -30.57]);
+});
+
+it('should encode and decode arrays of negative numbers when a proper "preTransform.translate" value is provided', () => {
+    const array = [-10, -20, -30];
+
+    expect(
+        decodeArray(encodeArray(array, { preTransform: { translate: 30 } })),
+    ).toEqual(array);
+
+    expect(() =>
+        encodeArray(array, { preTransform: { translate: 29 } }),
+    ).toThrow();
 });
