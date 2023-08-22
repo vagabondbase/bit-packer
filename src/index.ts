@@ -1,6 +1,9 @@
 import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
-const headerOffset = 1 + 1 + 4 + 4;
+const CONSTANTS = {
+  headerOffset: 1 + 1 + 4 + 4,
+  bufferEncoding: 'utf16le',
+} as const;
 
 export type EncodeArrayOptions =
   | undefined
@@ -66,7 +69,7 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   const chunkLength = Math.floor(19 / maxNumberOfDigits);
   const chunks = chunk({ array, chunkLength });
 
-  const buffer = Buffer.alloc(headerOffset + chunks.length * 8);
+  const buffer = Buffer.alloc(CONSTANTS.headerOffset + chunks.length * 8);
   buffer.writeUint8(maxNumberOfDigits); // 1 byte for maxNumberOfDigits
   buffer.writeUint8(arrayIncludesZero ? 1 : 0, 1); // 1 byte for arrayIncludesZero
   buffer.writeFloatLE(scale, 2); // 4 bytes for `preTransform.scale`
@@ -76,7 +79,7 @@ export const encodeArray = <T extends EncodeArrayOptions>(
     const chunk = chunks[chunkIndex];
     buffer.writeBigUInt64LE(
       chunkToBigInt(chunk, { numberOfDigits: maxNumberOfDigits }),
-      headerOffset + chunkIndex * 8,
+      CONSTANTS.headerOffset + chunkIndex * 8,
     );
   }
 
@@ -87,14 +90,14 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   ) {
     return buffer as EncodeArrayReturnMap<T>;
   } else {
-    return buffer.toString('utf16le') as EncodeArrayReturnMap<T>;
+    return buffer.toString(CONSTANTS.bufferEncoding) as EncodeArrayReturnMap<T>;
   }
 };
 
 export const decodeArray = (encodedArray: Buffer | string) => {
   const buffer =
     typeof encodedArray === 'string'
-      ? Buffer.from(encodedArray, 'utf16le')
+      ? Buffer.from(encodedArray, CONSTANTS.bufferEncoding)
       : encodedArray;
 
   const array: number[] = [];
@@ -106,10 +109,12 @@ export const decodeArray = (encodedArray: Buffer | string) => {
 
   for (
     let chunkIndex = 0;
-    chunkIndex < (buffer.length - headerOffset) / 8;
+    chunkIndex < (buffer.length - CONSTANTS.headerOffset) / 8;
     chunkIndex++
   ) {
-    const bigIntValue = buffer.readBigUInt64LE(headerOffset + chunkIndex * 8);
+    const bigIntValue = buffer.readBigUInt64LE(
+      CONSTANTS.headerOffset + chunkIndex * 8,
+    );
 
     const chunk = bigIntToChunk(bigIntValue, {
       numberOfDigits: maxNumberOfDigits,
