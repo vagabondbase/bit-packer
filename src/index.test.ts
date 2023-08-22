@@ -1,5 +1,17 @@
-import { expect, it, test } from 'vitest';
+import { expect, expectTypeOf, it, test } from 'vitest';
 import { encodeArray, decodeArray } from './index';
+
+test('Typescript types', () => {
+  expectTypeOf(encodeArray([1])).toEqualTypeOf<Buffer>();
+
+  expectTypeOf(
+    encodeArray([1], { returnType: 'buffer' }),
+  ).toEqualTypeOf<Buffer>();
+
+  expectTypeOf(
+    encodeArray([1], { returnType: 'string' }),
+  ).toEqualTypeOf<string>();
+});
 
 it('should encode arrays of length 1', () => {
   const arrays = [[0], [1], [2]];

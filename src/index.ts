@@ -1,18 +1,26 @@
 import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
-const bufferEncoding: BufferEncoding = 'utf16le';
 const headerOffset = 1 + 1 + 4 + 4;
 
-export type EncodeArrayOptions = {
-  preTransform?: {
-    scale?: number;
-    translate?: number;
-  };
-};
+export type EncodeArrayOptions =
+  | undefined
+  | {
+      returnType?: 'string' | 'buffer';
+      preTransform?: {
+        scale?: number;
+        translate?: number;
+      };
+    };
 
-export const encodeArray = (
+type EncodeArrayReturnMap<T extends EncodeArrayOptions> = T extends {
+  returnType: 'string';
+}
+  ? string
+  : Buffer;
+
+export const encodeArray = <T extends EncodeArrayOptions>(
   inputArray: number[],
-  options?: EncodeArrayOptions,
+  options?: T,
 ) => {
   const scale = options?.preTransform?.scale || 1;
   const translate = options?.preTransform?.translate || 0;
@@ -72,11 +80,23 @@ export const encodeArray = (
     );
   }
 
-  return buffer.toString(bufferEncoding);
+  if (
+    !options ||
+    !('returnType' in options) ||
+    options.returnType === 'buffer'
+  ) {
+    return buffer as EncodeArrayReturnMap<T>;
+  } else {
+    return buffer.toString('utf16le') as EncodeArrayReturnMap<T>;
+  }
 };
 
-export const decodeArray = (encodedArray: string) => {
-  const buffer = Buffer.from(encodedArray, bufferEncoding);
+export const decodeArray = (encodedArray: Buffer | string) => {
+  const buffer =
+    typeof encodedArray === 'string'
+      ? Buffer.from(encodedArray, 'utf16le')
+      : encodedArray;
+
   const array: number[] = [];
 
   const maxNumberOfDigits = buffer.readUInt8(0);
