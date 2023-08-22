@@ -1,6 +1,22 @@
 import { expect, expectTypeOf, it, test } from 'vitest';
 import { encodeArray, decodeArray } from './index';
 
+const testEncodeAndDecode = (...args: Parameters<typeof encodeArray>) => {
+  const [array, options] = args;
+
+  expect(
+    decodeArray(encodeArray(array, { ...options, returnType: 'string' })),
+  ).toEqual(array);
+
+  const buffer = encodeArray(array, { ...options, returnType: 'buffer' });
+  expect(decodeArray(buffer)).toEqual(array);
+
+  for (const encoding of ['hex', 'utf16le'] as const) {
+    const reEncodedBuffer = Buffer.from(buffer.toString(encoding), encoding);
+    expect(decodeArray(reEncodedBuffer)).toEqual(array);
+  }
+};
+
 test('Typescript types', () => {
   expectTypeOf(encodeArray([1])).toEqualTypeOf<Buffer>();
 
@@ -41,12 +57,12 @@ it('should throw an error when encoding arrays with negative numbers', () => {
 
 it('should encode and decode an array of 1M numbers', () => {
   const array = Array(1_000_000).fill(12345);
-  expect(decodeArray(encodeArray(array))).toEqual(array);
+  testEncodeAndDecode(array);
 });
 
 it('should encode and decode arrays of very large numbers', () => {
   const array = Array(100).fill(Number.MAX_SAFE_INTEGER);
-  expect(decodeArray(encodeArray(array))).toEqual(array);
+  testEncodeAndDecode(array);
 });
 
 it('should encode and decode arrays of numbers with same amounts of digits', () => {
@@ -56,18 +72,18 @@ it('should encode and decode arrays of numbers with same amounts of digits', () 
   ];
 
   for (const array of arrays) {
-    expect(decodeArray(encodeArray(array))).toEqual(array);
+    testEncodeAndDecode(array);
   }
 });
 
 it('should encode and decode arrays of numbers with different amounts of digits', () => {
   const array = [1, 2, 34, 567, 8999];
-  expect(decodeArray(encodeArray(array))).toEqual(array);
+  testEncodeAndDecode(array);
 });
 
 it('should encode and decode arrays of numbers with different amounts of digits containing zeros', () => {
   const array = [0, 1, 10, 100, 101, 110, 111];
-  expect(decodeArray(encodeArray(array))).toEqual(array);
+  testEncodeAndDecode(array);
 });
 
 it('should encode and decode arrays of negative numbers when a proper "preTransform.scale" value is provided', () => {
@@ -80,11 +96,9 @@ it('should encode and decode arrays of negative numbers when a proper "preTransf
 it('should encode and decode arrays of negative numbers when a proper "preTransform.translate" value is provided', () => {
   const array = [-10, -20, -30];
 
-  expect(
-    decodeArray(encodeArray(array, { preTransform: { translate: 30 } })),
-  ).toEqual(array);
+  testEncodeAndDecode(array, { preTransform: { translate: 30 } });
 
   expect(() =>
-    encodeArray(array, { preTransform: { translate: 29 } }),
+    testEncodeAndDecode(array, { preTransform: { translate: 29 } }),
   ).toThrow();
 });

@@ -2,7 +2,7 @@ import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
 const CONSTANTS = {
   headerOffset: 1 + 1 + 4 + 4,
-  bufferEncoding: 'utf16le',
+  bufferEncoding: 'utf16le' satisfies BufferEncoding,
 } as const;
 
 export type EncodeArrayOptions =
