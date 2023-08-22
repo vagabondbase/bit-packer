@@ -4,11 +4,18 @@ import { encodeArray, decodeArray } from './index';
 const testEncodeAndDecode = (...args: Parameters<typeof encodeArray>) => {
   const [array, options] = args;
 
-  expect(
-    decodeArray(encodeArray(array, { ...options, returnType: 'string' })),
-  ).toEqual(array);
-
+  const hexEncoded = encodeArray(array, {
+    ...options,
+    returnType: 'string-hex',
+  });
+  const utf16Encoded = encodeArray(array, {
+    ...options,
+    returnType: 'string-utf16',
+  });
   const buffer = encodeArray(array, { ...options, returnType: 'buffer' });
+
+  expect(decodeArray(hexEncoded)).toEqual(array);
+  expect(decodeArray(utf16Encoded)).toEqual(array);
   expect(decodeArray(buffer)).toEqual(array);
 
   for (const encoding of ['hex', 'utf16le'] as const) {
@@ -25,7 +32,11 @@ test('Typescript types', () => {
   ).toEqualTypeOf<Buffer>();
 
   expectTypeOf(
-    encodeArray([1], { returnType: 'string' }),
+    encodeArray([1], { returnType: 'string-hex' }),
+  ).toEqualTypeOf<string>();
+
+  expectTypeOf(
+    encodeArray([1], { returnType: 'string-utf16' }),
   ).toEqualTypeOf<string>();
 });
 

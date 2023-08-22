@@ -2,13 +2,12 @@ import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
 const CONSTANTS = {
   headerOffset: 1 + 1 + 4 + 4,
-  bufferEncoding: 'utf16le' satisfies BufferEncoding,
 } as const;
 
 export type EncodeArrayOptions =
   | undefined
   | {
-      returnType?: 'string' | 'buffer';
+      returnType?: 'string-hex' | 'string-utf16' | 'buffer';
       preTransform?: {
         scale?: number;
         translate?: number;
@@ -16,8 +15,10 @@ export type EncodeArrayOptions =
     };
 
 type EncodeArrayReturnMap<T extends EncodeArrayOptions> = T extends {
-  returnType: 'string';
+  returnType: 'string-hex';
 }
+  ? string
+  : T extends { returnType: 'string-utf16' }
   ? string
   : Buffer;
 
@@ -90,14 +91,19 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   ) {
     return buffer as EncodeArrayReturnMap<T>;
   } else {
-    return buffer.toString(CONSTANTS.bufferEncoding) as EncodeArrayReturnMap<T>;
+    return buffer.toString(
+      options.returnType === 'string-hex' ? 'hex' : 'utf16le',
+    ) as EncodeArrayReturnMap<T>;
   }
 };
 
 export const decodeArray = (encodedArray: Buffer | string) => {
   const buffer =
     typeof encodedArray === 'string'
-      ? Buffer.from(encodedArray, CONSTANTS.bufferEncoding)
+      ? Buffer.from(
+          encodedArray,
+          /^[0-9A-Fa-f]*$/.test(encodedArray) ? 'hex' : 'utf16le',
+        )
       : encodedArray;
 
   const array: number[] = [];
