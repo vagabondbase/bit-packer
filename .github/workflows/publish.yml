@@ -4,6 +4,8 @@ on:
     branches:
       - 'main'
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -23,7 +25,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release Pull Request
+      - name: Create Release Pull Request or Publish
+        id: changesets
         uses: changesets/action@v1
+        with:
+          publish: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
