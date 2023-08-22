@@ -2,16 +2,14 @@ import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
 const CONSTANTS = {
   headerOffset: 1 + 1 + 4 + 4,
+  majorVersion: 0,
 } as const;
 
 export type EncodeArrayOptions =
   | undefined
   | {
       returnType?: 'string-hex' | 'string-utf16' | 'buffer';
-      preTransform?: {
-        scale?: number;
-        translate?: number;
-      };
+      fractionDigits?: number;
     };
 
 type EncodeArrayReturnMap<T extends EncodeArrayOptions> = T extends {
@@ -26,17 +24,31 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   inputArray: number[],
   options?: T,
 ) => {
-  const scale = options?.preTransform?.scale || 1;
-  const translate = options?.preTransform?.translate || 0;
+  const scale =
+    options?.fractionDigits && options.fractionDigits > 0
+      ? Math.pow(10, options.fractionDigits)
+      : 1;
 
   let array = [] as typeof inputArray;
-  const arrayIncludesZero = inputArray.includes(0);
-  for (let i = 0; i < inputArray.length; i++) {
-    let number = inputArray[i];
 
-    if (options?.preTransform) {
-      number = Math.round(number * scale + translate);
+  let minValue = Math.round(inputArray[0] * scale);
+  for (let i = 0; i < inputArray.length; i++) {
+    const number = Math.round(inputArray[i] * scale);
+    array[i] = number;
+    if (number < minValue) {
+      minValue = number;
     }
+  }
+
+  let translate = 0;
+  if (minValue < 0) {
+    translate = Math.abs(minValue) + 1;
+  } else if (inputArray.includes(0)) {
+    translate = 1;
+  }
+
+  for (let i = 0; i < inputArray.length; i++) {
+    const number = array[i] + translate;
 
     if (!Number.isFinite(number)) {
       throw new Error(
@@ -46,15 +58,11 @@ export const encodeArray = <T extends EncodeArrayOptions>(
 
     if (!Number.isSafeInteger(number)) {
       throw new Error(
-        'Array must only contain safe integers or floats that can be converted to safe integers (the conversion is done by multiplying each number by the provided multiplier and rounding the result. You must provide a multiplier if you want to encode floats)',
+        "Array must only contain safe integers strictly positive – or numbers that can be transformed into such through scaling and translation by the library. There's probably nothing you can do about this, besides providing a different array.",
       );
     }
 
-    if (number < 0) {
-      throw new Error('Array must only contain positive numbers');
-    }
-
-    array[i] = arrayIncludesZero ? number + 1 : number;
+    array[i] = number;
   }
 
   let maxNumberOfDigits = numberOfDigits(array[0]);
@@ -71,8 +79,8 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   const chunks = chunk({ array, chunkLength });
 
   const buffer = Buffer.alloc(CONSTANTS.headerOffset + chunks.length * 8);
-  buffer.writeUint8(maxNumberOfDigits); // 1 byte for maxNumberOfDigits
-  buffer.writeUint8(arrayIncludesZero ? 1 : 0, 1); // 1 byte for arrayIncludesZero
+  buffer.writeUint8(CONSTANTS.majorVersion); // 1 byte for package version
+  buffer.writeUint8(maxNumberOfDigits, 1); // 1 byte for maxNumberOfDigits
   buffer.writeFloatLE(scale, 2); // 4 bytes for `preTransform.scale`
   buffer.writeFloatLE(translate, 6); // 4 bytes for `preTransform.translate`
 
@@ -108,8 +116,7 @@ export const decodeArray = (encodedArray: Buffer | string) => {
 
   const array: number[] = [];
 
-  const maxNumberOfDigits = buffer.readUInt8(0);
-  const arrayIncludesZero = buffer.readUInt8(1) === 1;
+  const maxNumberOfDigits = buffer.readUInt8(1);
   const scale = buffer.readFloatLE(2);
   const translate = buffer.readFloatLE(6);
 
@@ -127,13 +134,8 @@ export const decodeArray = (encodedArray: Buffer | string) => {
     });
 
     for (let i = 0; i < chunk.length; i++) {
-      let value = chunk[i];
-
-      if (arrayIncludesZero) {
-        value -= 1;
-      }
-
-      array.push(value / scale - translate);
+      let value = (chunk[i] - translate) / scale;
+      array.push(value);
     }
   }
 

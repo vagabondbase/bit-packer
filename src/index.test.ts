@@ -40,6 +40,13 @@ test('Typescript types', () => {
   ).toEqualTypeOf<string>();
 });
 
+it('should include the correct npm version in the header', () => {
+  const encoded = encodeArray([1234]);
+  expect(encoded.readUInt8(0)).toEqual(
+    parseInt(process.env.npm_package_version || ''),
+  );
+});
+
 it('should encode arrays of length 1', () => {
   const arrays = [[0], [1], [2]];
 
@@ -58,16 +65,8 @@ it('should throw an error when encoding arrays with non-safe integers', () => {
   expect(() => encodeArray([Number.MAX_SAFE_INTEGER + 1])).toThrow();
 });
 
-it('should throw an error when encoding arrays with non-integers', () => {
-  expect(() => encodeArray([1.1])).toThrow();
-});
-
-it('should throw an error when encoding arrays with negative numbers', () => {
-  expect(() => encodeArray([-1])).toThrow();
-});
-
 it('should encode and decode an array of 1M numbers', () => {
-  const array = Array(1_000_000).fill(12345);
+  const array = Array.from({ length: 1_000_000 }, (_, i) => i - 500_000);
   testEncodeAndDecode(array);
 });
 
@@ -97,19 +96,33 @@ it('should encode and decode arrays of numbers with different amounts of digits 
   testEncodeAndDecode(array);
 });
 
-it('should encode and decode arrays of negative numbers when a proper "preTransform.scale" value is provided', () => {
-  const array = [-10.123456789, -20.123456789, -30.56789];
+it('should encode and decode arrays of negative decimal numbers', () => {
   expect(
-    decodeArray(encodeArray(array, { preTransform: { scale: -100 } })),
-  ).toEqual([-10.12, -20.12, -30.57]);
+    decodeArray(
+      encodeArray([-10.12, -20.123456789, -30.56789, -40.6], {
+        fractionDigits: 2,
+      }),
+    ),
+  ).toEqual([-10.12, -20.12, -30.57, -40.6]);
 });
 
-it('should encode and decode arrays of negative numbers when a proper "preTransform.translate" value is provided', () => {
-  const array = [-10, -20, -30];
+it('should encode and decode arrays of decimal numbers and integers', () => {
+  expect(
+    decodeArray(
+      encodeArray([1, 10, -11, -20.123456789, 30.56789, -40.6], {
+        fractionDigits: 2,
+      }),
+    ),
+  ).toEqual([1, 10, -11, -20.12, 30.57, -40.6]);
+});
 
-  testEncodeAndDecode(array, { preTransform: { translate: 30 } });
+it('should encode and decode arrays of negative integers', () => {
+  const array = [0, -1, -10, -20, -21];
+  testEncodeAndDecode(array);
+});
 
-  expect(() =>
-    testEncodeAndDecode(array, { preTransform: { translate: 29 } }),
-  ).toThrow();
+it('should encode and decode arrays of negative and positive integers', () => {
+  // Do not forget that -0 is a thing in JS
+  const array = [0, -1, -10, -20, -21].flatMap(n => (n === 0 ? n : [n, -n]));
+  testEncodeAndDecode(array);
 });
