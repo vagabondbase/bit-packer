@@ -19,9 +19,11 @@
     "test": "vitest run",
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
-    "format": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern --list-different \"**/*\""
+    "format": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern --list-different \"**/*\"",
+    "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@types/node": "^20.5.1",
     "prettier": "^3.0.2",
     "tsup": "^7.2.0",
