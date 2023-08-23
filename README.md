@@ -32,7 +32,8 @@ import { BitPacker } from 'bit-packer';
 const buffer = BitPacker.encodeArray([1, 2, 3]);
 
 // Array to string
-const hexString = BitPacker.encodeArray([1, 2, 3], {
+const hexString = BitPacker.encodeArray([1.234, 2.3, 3], {
+  fractionDigits: 2,
   returnType: 'string-utf16',
 });
 ```
