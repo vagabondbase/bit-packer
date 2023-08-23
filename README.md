@@ -5,7 +5,7 @@
     <a href="https://npm.im/bit-packer">
       <img src="https://img.shields.io/badge/TypeScript-blue" alt="TypeScript" />
     </a>
-    <a href="https://www.npmjs.com/package/bit-packer">
+    <a href="https://www.npmjs.com/package/@vagabondbase/bit-packer">
       <img src="https://img.shields.io/npm/v/@vagabondbase/bit-packer" alt="npm latest release" />
     </a>
     <a href="https://github.com/vagabondbase/bit-packer/actions?query=branch%3Amain">
