@@ -141,3 +141,8 @@ export const decodeArray = (encodedArray: Buffer | string) => {
 
   return array;
 };
+
+export const BitPacker = {
+  encodeArray,
+  decodeArray,
+};
