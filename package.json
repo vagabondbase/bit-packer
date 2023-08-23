@@ -1,7 +1,7 @@
 {
   "name": "@vagabondbase/bit-packer",
   "version": "0.0.1",
-  "description": "",
+  "description": "Pack multiple numeric values into compact representations.",
   "keywords": [
     "bit packer"
   ],

@@ -1,7 +1,6 @@
 <p align="center">
   <h1 align="center">Bit Packer</h1>
-  <p align="center">Maximize Bit Utilization for Numeric Arrays.</p>
-  <p align="center">Compress multiple numbers into a single integer.</p>
+  <p align="center">Pack multiple numeric values into compact representations.</p>
   <p align="center" style="align: center;">
     <a href="https://npm.im/bit-packer">
       <img src="https://img.shields.io/badge/TypeScript-blue" alt="TypeScript" />
