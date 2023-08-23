@@ -4,10 +4,10 @@
   <p align="center">Compress multiple numbers into a single integer.</p>
   <p align="center" style="align: center;">
     <a href="https://npm.im/bit-packer">
-      <img src="https://img.shields.io/badge/TypeScript-blue?style=flat-square" alt="TypeScript" />
+      <img src="https://img.shields.io/badge/TypeScript-blue" alt="TypeScript" />
     </a>
     <a href="https://www.npmjs.com/package/bit-packer">
-      <img src="https://img.shields.io/github/v/release/vagabondbase/bit-packer?label=latest&style=flat-square" alt="Github Stable Release" />
+      <img src="https://img.shields.io/npm/v/@vagabondbase/bit-packer" alt="npm latest release" />
     </a>
     <a href="https://github.com/vagabondbase/bit-packer/actions?query=branch%3Amain">
       <img src="https://github.com/vagabondbase/bit-packer/actions/workflows/main.yml/badge.svg" alt="CI status" />
