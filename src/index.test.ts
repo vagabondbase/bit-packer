@@ -1,5 +1,6 @@
 import { expect, expectTypeOf, it, test } from 'vitest';
 import { encodeArray, decodeArray } from './index';
+import * as zlib from 'node:zlib';
 
 const testEncodeAndDecode = (...args: Parameters<typeof encodeArray>) => {
   const [array, options] = args;
@@ -13,10 +14,16 @@ const testEncodeAndDecode = (...args: Parameters<typeof encodeArray>) => {
     returnType: 'string-utf16',
   });
   const buffer = encodeArray(array, { ...options, returnType: 'buffer' });
+  const gzipBuffer = zlib.gzipSync(buffer);
+  const deflateBuffer = zlib.deflateSync(buffer);
+  const brotliBuffer = zlib.brotliCompressSync(buffer);
 
   expect(decodeArray(hexEncoded)).toEqual(array);
   expect(decodeArray(utf16Encoded)).toEqual(array);
   expect(decodeArray(buffer)).toEqual(array);
+  expect(decodeArray(zlib.gunzipSync(gzipBuffer))).toEqual(array);
+  expect(decodeArray(zlib.inflateSync(deflateBuffer))).toEqual(array);
+  expect(decodeArray(zlib.brotliDecompressSync(brotliBuffer))).toEqual(array);
 
   for (const encoding of ['hex', 'utf16le'] as const) {
     const reEncodedBuffer = Buffer.from(buffer.toString(encoding), encoding);
