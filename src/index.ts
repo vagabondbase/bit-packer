@@ -1,7 +1,7 @@
 import { bigIntToChunk, chunk, chunkToBigInt, numberOfDigits } from './utils';
 
 const CONSTANTS = {
-  headerOffset: 1 + 1 + 4 + 4,
+  headerLength: 1 + 1 + 4 + 4,
   majorVersion: 0,
 } as const;
 
@@ -78,7 +78,7 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   const chunkLength = Math.floor(19 / maxNumberOfDigits);
   const chunks = chunk({ array, chunkLength });
 
-  const buffer = Buffer.alloc(CONSTANTS.headerOffset + chunks.length * 8);
+  const buffer = Buffer.alloc(CONSTANTS.headerLength + chunks.length * 8);
   buffer.writeUint8(CONSTANTS.majorVersion); // 1 byte for package version
   buffer.writeUint8(maxNumberOfDigits, 1); // 1 byte for maxNumberOfDigits
   buffer.writeFloatLE(scale, 2); // 4 bytes for `preTransform.scale`
@@ -88,7 +88,7 @@ export const encodeArray = <T extends EncodeArrayOptions>(
     const chunk = chunks[chunkIndex];
     buffer.writeBigUInt64LE(
       chunkToBigInt(chunk, { numberOfDigits: maxNumberOfDigits }),
-      CONSTANTS.headerOffset + chunkIndex * 8,
+      CONSTANTS.headerLength + chunkIndex * 8,
     );
   }
 
@@ -122,11 +122,11 @@ export const decodeArray = (encodedArray: Buffer | string) => {
 
   for (
     let chunkIndex = 0;
-    chunkIndex < (buffer.length - CONSTANTS.headerOffset) / 8;
+    chunkIndex < (buffer.length - CONSTANTS.headerLength) / 8;
     chunkIndex++
   ) {
     const bigIntValue = buffer.readBigUInt64LE(
-      CONSTANTS.headerOffset + chunkIndex * 8,
+      CONSTANTS.headerLength + chunkIndex * 8,
     );
 
     const chunk = bigIntToChunk(bigIntValue, {
