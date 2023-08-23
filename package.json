@@ -20,12 +20,14 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
     "format": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern --list-different \"**/*\"",
-    "release": "pnpm run build && changeset publish"
+    "release": "pnpm run build && changeset publish",
+    "scripts:compare-with-json": "ts-node scripts/compare-with-json.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@types/node": "^20.5.1",
     "prettier": "^3.0.2",
+    "ts-node": "^10.9.1",
     "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "vitest": "^0.34.2"
