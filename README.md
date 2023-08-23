@@ -18,7 +18,7 @@
 ## Installation
 
 ```sh
-npm install bit-packer
+npm install @vagabondbase/bit-packer
 ```
 
 ## Usage
