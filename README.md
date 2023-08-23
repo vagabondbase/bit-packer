@@ -2,7 +2,7 @@
   <h1 align="center">Bit Packer</h1>
   <p align="center">Pack multiple numeric values into compact representations.</p>
   <p align="center" style="align: center;">
-    <a href="https://npm.im/bit-packer">
+    <a href="https://www.npmjs.com/package/@vagabondbase/bit-packer">
       <img src="https://img.shields.io/badge/TypeScript-blue" alt="TypeScript" />
     </a>
     <a href="https://www.npmjs.com/package/@vagabondbase/bit-packer">
