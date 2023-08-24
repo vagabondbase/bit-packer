@@ -71,6 +71,14 @@ describe('utils:chunkToBigInt, utils:bigIntToChunk', () => {
       1_11_02_22n,
     );
 
+    expect(utils.chunkToBigInt([10, 20, 300], { numberOfDigits: 3 })).toBe(
+      10_020_003n,
+    );
+
+    expect(utils.chunkToBigInt([1, 20, 300], { numberOfDigits: 3 })).toBe(
+      100_020_003n,
+    );
+
     expect(
       utils.bigIntToChunk(
         utils.chunkToBigInt([1, 2, 3], { numberOfDigits: 1 }),
@@ -98,5 +106,14 @@ describe('utils:chunkToBigInt, utils:bigIntToChunk', () => {
         { numberOfDigits: 3 },
       ),
     ).toEqual([1, 22, 303]);
+
+    expect(
+      utils.bigIntToChunk(
+        utils.chunkToBigInt([10, 20, 300], {
+          numberOfDigits: 3,
+        }),
+        { numberOfDigits: 3 },
+      ),
+    ).toEqual([10, 20, 300]);
   });
 });

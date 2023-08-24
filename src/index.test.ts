@@ -133,3 +133,12 @@ it('should encode and decode arrays of negative and positive integers', () => {
   const array = [0, -1, -10, -20, -21].flatMap(n => (n === 0 ? n : [n, -n]));
   testEncodeAndDecode(array);
 });
+
+it('should encode and decode arrays with a lot of zeros', () => {
+  const array1 = Array.from({ length: 101 }, (_, i) => (i + 1) * 1e6); // [1e6, 2e6, 3e6, ..., 99e6]
+  const array2 = Array.from({ length: 100 }, (_, i) => (i + 1) * 1e6);
+  const array3 = Array.from({ length: 99 }, (_, i) => (i + 1) * 1e6);
+  testEncodeAndDecode(array1);
+  testEncodeAndDecode(array2);
+  testEncodeAndDecode(array3);
+});
