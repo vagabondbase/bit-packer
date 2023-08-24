@@ -24,10 +24,7 @@ export const encodeArray = <T extends EncodeArrayOptions>(
   inputArray: number[],
   options?: T,
 ) => {
-  const scale =
-    options?.fractionDigits && options.fractionDigits > 0
-      ? Math.pow(10, options.fractionDigits)
-      : 1;
+  const scale = Math.pow(10, options?.fractionDigits ?? 0);
 
   let array = [] as typeof inputArray;
 
